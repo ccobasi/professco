@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'courses',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -127,6 +129,62 @@ STATIC_ROOT = BASE_DIR/'static_root'
 STATICFILES_DIRS = [
     BASE_DIR/'static',
 ]
+
+# Auth settings
+AUTH_USER_MODEL = 'users.User'
+
+# DJOSER={
+#     'SERIALIZERS':{
+#         'user': 'users.serializers.UserAuthSerializer',
+#         'current_user': 'users.serializers.UserAuthSerializer'
+#         }
+# }
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ),
+# }
+
+# SIMPLE_JWT = {
+#    'AUTH_HEADER_TYPES': ('Token',),
+# }
+
+
+# CORS_ALLOWED_ORIGINS = [
+
+#     'http://localhost:3000',
+#     'http://127.0.0.1:3000',
+
+# ]
+
+# CSRF_TRUSTED_ORIGINS = [
+#     'localhost:3000',
+#     '127.0.0.1:3000',
+# ]
+
+
+# # PAYMENT
+# STRIPE_SECRET_KEY=os.environ.get('STRIPE_SECRET_KEY')
+# STRIPE_PUBLIC_KEY=os.environ.get('STRIPE_PUBLIC_KEY')
+# WEBHOOK_SECRET=os.environ.get('WEBHOOK_SECRET')
+
+
+# APPEND_SLASH=False
+
+# # cloudinary settings
+# CLOUDINARY_STORAGE = {
+#     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+#     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+#     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET')
+# }
+
+# cloudinary.config(
+#   cloud_name =os.environ.get('CLOUDINARY_CLOUD_NAME'),
+#   api_key = os.environ.get('CLOUDINARY_API_KEY'),
+#   api_secret = os.environ.get('CLOUDINARY_API_SECRET'),
+#   secure = False
+# )
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
