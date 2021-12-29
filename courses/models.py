@@ -30,7 +30,7 @@ class Course(models.Model):
     course_uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     image_url = models.ImageField(
         upload_to='course_images', storage=MediaCloudinaryStorage())
-    price = models.DecimalField(max_digits=5, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def get_rating(self):
         ratings = self.rating.all()
