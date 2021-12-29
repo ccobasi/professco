@@ -20,7 +20,7 @@ class Course(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     rating = models.ManyToManyField('Rate', blank=True)
-    sector = models.ForeignKey('Sector', on_delete=models.CASCADE)
+    # sector = models.ForeignKey('Sector', on_delete=models.CASCADE)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     student_rating = models.IntegerField(default=0)
