@@ -30,7 +30,7 @@ class Course(models.Model):
     comment = models.ManyToManyField('Comment', blank=True)
     course_uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     image_url = models.ImageField(
-        upload_to='course_images', storage=MediaCloudinaryStorage())
+        upload_to='course_images')
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def get_rating(self):
@@ -129,4 +129,7 @@ class Sector(models.Model):
     sector_uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     related_courses = models.ManyToManyField(Course, blank=True)
     sector_image = models.ImageField(
-        upload_to='sector_images', storage=MediaCloudinaryStorage())
+        upload_to='sector_images')
+
+    def get_image_absolute_url(self):
+        return 'http:localhost:8000'+self.sector_image

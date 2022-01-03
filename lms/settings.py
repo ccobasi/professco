@@ -148,15 +148,15 @@ AUTH_USER_MODEL = 'users.User'
 #         }
 # }
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#     ),
-# }
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
-# SIMPLE_JWT = {
-#    'AUTH_HEADER_TYPES': ('Token',),
-# }
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Token',),
+}
 
 
 # CORS_ALLOWED_ORIGINS = [

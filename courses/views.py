@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from courses.models import Course, Sector
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ValidationError
+from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed
 from courses.serializers import CartItemSerializer, CommentSerializer, CourseDisplaySerializer, CourseListSerializer, CoursePaidSerializer, CourseUnPaidSerializer, SectorSerializer
 
 
@@ -27,3 +29,19 @@ class CoursesHomeViews(APIView):
         # serializer=SectorSerializer(sectors=sector_response,many=True)
 
         return Response(data=sector_response, status=status.HTTP_200_OK)
+
+
+class CourseDetail(APIView):
+    def get(self, request, course_uuid, *args, **kwargs):
+        try:
+
+            course = Course.objects.filter(course_uuid=course_uuid)
+        except ValidationError:
+            return HttpResponseBadRequest('Invalid Course uuid')
+
+        if not course:
+            return HttpResponseBadRequest('Course does not exist')
+
+        serializer = CourseUnPaidSerializer(course[0])
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
