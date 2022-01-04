@@ -7,6 +7,8 @@ from rest_framework import serializers, status
 from django.core.exceptions import ValidationError
 from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed
 from courses.serializers import CartItemSerializer, CommentSerializer, CourseDisplaySerializer, CourseListSerializer, CoursePaidSerializer, CourseUnPaidSerializer, SectorSerializer
+import json
+from rest_framework.permissions import IsAuthenticated
 
 
 class CoursesHomeViews(APIView):
@@ -99,3 +101,33 @@ class CourseSearch(APIView):
     #                      'total_students': total_students,
     #                      'image': sector[0].sector_image.url},
     #                     status=status.HTTP_200_OK)
+
+
+class AddComment(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    def post(self, request, course_uuid, *args, **kwargs):
+        try:
+            course = Course.objects.get(course_uuid=course_uuid)
+        except Course.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            content = json.loads(request.body)
+        except json.decoder.JSONDecodeError:
+            return Response("Please provide  a json body",status=status.HTTP_400_BAD_REQUEST)
+
+        if not content.get('message'):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CommentSerializer(data=content)
+
+        if serializer.is_valid():
+            comment = serializer.save(user=request.user)
+
+            course.comment.add(comment)
+
+            return Response(status=status.HTTP_200_OK)
+
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)

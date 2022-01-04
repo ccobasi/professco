@@ -7,6 +7,7 @@ from django.urls.conf import include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('courses/', include('courses.urls', namespace='courses')),
+
 ]
 
 if settings.DEBUG:
