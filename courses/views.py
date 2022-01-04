@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from courses.models import Course, Sector
+from django.db.models.query_utils import Q
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import serializers, status
 from django.core.exceptions import ValidationError
 from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed
 from courses.serializers import CartItemSerializer, CommentSerializer, CourseDisplaySerializer, CourseListSerializer, CoursePaidSerializer, CourseUnPaidSerializer, SectorSerializer
@@ -46,6 +47,7 @@ class CourseDetail(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class SectorCourse(APIView):
     def get(self, request, sector_uuid, *args, **kwargs):
         sector = Sector.objects.filter(sector_uuid=sector_uuid)
@@ -67,3 +69,33 @@ class SectorCourse(APIView):
                          'total_students': total_students,
                          'image': sector[0].sector_image.url},
                         status=status.HTTP_200_OK)
+
+
+class CourseSearch(APIView):
+    def get(self, request, search_term):
+        print(search_term)
+        matches = Course.objects.filter(
+            Q(title__icontains=search_term) | Q(description__icontains=search_term))
+        print(matches)
+        serializer = CourseListSerializer(matches, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    # def get(self, request, sector_uuid, *args, **kwargs):
+    #     sector = Sector.objects.filter(sector_uuid=sector_uuid)
+
+    #     if not sector:
+    #         return HttpResponseBadRequest("Course sector does not exist")
+
+    #     sector_courses = sector[0].related_courses.all()
+
+    #     serializer = CourseListSerializer(sector_courses, many=True)
+
+    #     total_students = 0
+
+    #     for course in sector_courses:
+    #         total_students += course.get_enrolled_students()
+
+    #     return Response({'data': serializer.data,
+    #                     'sector_name': sector[0].name,
+    #                      'total_students': total_students,
+    #                      'image': sector[0].sector_image.url},
+    #                     status=status.HTTP_200_OK)
