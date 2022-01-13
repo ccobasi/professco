@@ -204,7 +204,7 @@ class CourseStudy(APIView):
         if not check_course:
 
             return HttpResponseBadRequest('Course does not exist')
-
+        request.user = User.objects.get(id=1)
         user_course = request.user.paid_course.filter(course_uuid=course_uuid)
 
         if not user_course:
