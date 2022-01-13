@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from courses.models import Course, Sector
+from users.models import User
 from django.db.models.query_utils import Q
 from rest_framework.response import Response
 from rest_framework import serializers, status
@@ -8,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed
 from courses.serializers import CartItemSerializer, CommentSerializer, CourseDisplaySerializer, CourseListSerializer, CoursePaidSerializer, CourseUnPaidSerializer, SectorSerializer
 import json
+from decimal import Decimal
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -104,30 +106,90 @@ class CourseSearch(APIView):
 
 
 class AddComment(APIView):
-    # permission_classes = [IsAuthenticated]
 
-    def post(self, request, course_uuid, *args, **kwargs):
+    # permission_classes = [IsAuthenticated]
+    def post(self, request, course_uuid):
         try:
             course = Course.objects.get(course_uuid=course_uuid)
         except Course.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
+            return HttpResponseBadRequest('Course does not exist')
         try:
             content = json.loads(request.body)
         except json.decoder.JSONDecodeError:
-            return Response("Please provide  a json body",status=status.HTTP_400_BAD_REQUEST)
-
+            return Response("Please provide  a json body", status=status.HTTP_400_BAD_REQUEST)
         if not content.get('message'):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CommentSerializer(data=content)
-
         if serializer.is_valid():
-            comment = serializer.save(user=request.user)
-
+            author = User.objects.get(id=1)
+            comment = serializer.save(user=author)
+            # comment=serializer.save(user=request.user)
             course.comment.add(comment)
-
-            return Response(status=status.HTTP_200_OK)
-
+            return Response(status=status.HTTP_201_CREATED)
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def post(self, request, course_uuid, *args, **kwargs):
+    #     try:
+    #         course = Course.objects.get(course_uuid=course_uuid)
+    #     except Course.DoesNotExist:
+    #         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    #     try:
+    #         content = json.loads(request.body)
+    #     except json.decoder.JSONDecodeError:
+    #         return Response("Please provide  a json body", status=status.HTTP_400_BAD_REQUEST)
+
+    #     if not content.get('message'):
+    #         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    #     serializer = CommentSerializer(data=content)
+
+    #     if serializer.is_valid():
+    #         comment = serializer.save(user=request.user)
+
+    #         course.comment.add(comment)
+
+    #         return Response(status=status.HTTP_200_OK)
+
+    #     else:
+    #         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetCartDetail(APIView):
+    def post(self, request, *args, **kwargs):
+
+        try:
+            body = json.loads(request.body)
+
+        except json.decoder.JSONDecodeError:
+            return HttpResponseBadRequest()
+
+        if type(body.get('cart')) != list:
+            return HttpResponseBadRequest()
+
+        if len(body.get("cart")) == 0:
+            return Response(data=[])
+
+        courses = []
+
+        for uuid in body.get("cart"):
+            item = Course.objects.filter(course_uuid=uuid)
+
+            if not item:
+                return HttpResponseBadRequest()
+
+            courses.append(item[0])
+
+            # serializer for cart
+        serializer = CartItemSerializer(courses, many=True)
+
+        # TODO : After you have added the price field
+        cart_cost = Decimal(0.00)
+
+        for item in serializer.data:
+
+            cart_cost += Decimal(item.get("price"))
+
+        return Response(data={"cart_detail": serializer.data, "cart_total": str(cart_cost)})
