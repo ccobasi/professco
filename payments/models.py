@@ -13,5 +13,5 @@ class PaymentIntent(models.Model):
 
 class Payment(models.Model):
     payment_intent = models.ForeignKey(PaymentIntent, on_delete=models.CASCADE)
-    total_amount = models.DecimalField(max_digits=7, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=9, decimal_places=2)
     created = models.DateTimeField(auto_now=True)
