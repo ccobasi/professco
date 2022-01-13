@@ -193,3 +193,26 @@ class GetCartDetail(APIView):
             cart_cost += Decimal(item.get("price"))
 
         return Response(data={"cart_detail": serializer.data, "cart_total": str(cart_cost)})
+
+
+class CourseStudy(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_uuid):
+        check_course = Course.objects.filter(course_uuid=course_uuid)
+
+        if not check_course:
+
+            return HttpResponseBadRequest('Course does not exist')
+
+        user_course = request.user.paid_course.filter(course_uuid=course_uuid)
+
+        if not user_course:
+
+            return HttpResponseNotAllowed("User has not purchased this course")
+
+        course = Course.objects.filter(course_uuid=course_uuid)[0]
+
+        serializer = CoursePaidSerializer(course)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
