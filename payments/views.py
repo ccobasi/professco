@@ -12,6 +12,7 @@ import os
 
 stripe_api_key = os.environ.get("STRIPE_APIKEY")
 endpoint_secret = ""
+stripe.api_key = stripe_api_key
 
 
 class PaymentHandler(APIView):
@@ -69,6 +70,56 @@ class PaymentHandler(APIView):
         )
 
         for course in cart_course:
-            intent.courses.add(course)
+            intent.courses.add(*cart_course)
+
+            # intent.courses.add(course)
 
         return Response({"url": checkout_session.url})
+
+
+class Webhook(APIView):
+
+    def post(self, request, *args, **kwargs):
+        payload = request.body
+        sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+        event = None
+
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
+        except ValueError as e:
+            # Invalid payload
+            return Response(status=400)
+        except stripe.error.SignatureVerificationError as e:
+            # Invalid signature
+            return Response(status=400)
+
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+
+            try:
+                # fetch user intent
+                intent = PaymentIntent.objects.get(
+                    payment_intent_id=session.payment_intent,
+                    checkout_id=session.id
+
+                )
+            except PaymentIntent.DoesNotExist:
+                return Response(status=400)
+
+            # create payment reciept
+            Payment.objects.create(
+                payment_intent=intent,
+                total_amount=Decimal(session.amount_total)/100,
+            )
+
+            for course in intent.courses.all():
+                # TODO add course to user profile
+                intent.user.paid_course.add(course)
+
+    # Fulfill the purchase...
+    # fulfill_order(session)
+
+  # Passed signature verification
+        return Response(status=200)
