@@ -10,7 +10,7 @@ import json
 from decimal import Decimal
 import os
 
-stripe_api_key = os.environ.get("STRIPE_APIKEY")
+stripe_api_key = "sk_test_GssPyqmJPpOmLRPSaMLDjF360080cQoEzL"
 endpoint_secret = ""
 stripe.api_key = stripe_api_key
 
@@ -31,7 +31,7 @@ class PaymentHandler(APIView):
 
                         line_item = {
                             'price_data': {
-                                'currency': '#',
+                                'currency': 'usd',
                                 'unit_amount': int(course.price*100),
                                 'product_data': {
                                     'name': course.title,
@@ -42,7 +42,7 @@ class PaymentHandler(APIView):
                         }
 
                         courses_line_items.append(line_item)
-                        cart_course.append(course)
+                        cart_course.append(line_item)
 
                     except Course.DoesNotExist:
                         pass
