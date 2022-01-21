@@ -3,9 +3,11 @@ from django.core.exceptions import ValidationError
 from payments.models import Payment, PaymentIntent
 import stripe
 from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.response import Response
 from django.conf import settings
 from courses.models import Course
+from users.models import User
 import json
 from decimal import Decimal
 import os
@@ -42,7 +44,7 @@ class PaymentHandler(APIView):
                         }
 
                         courses_line_items.append(line_item)
-                        cart_course.append(line_item)
+                        cart_course.append(course)
 
                     except Course.DoesNotExist:
                         pass
@@ -66,13 +68,16 @@ class PaymentHandler(APIView):
         intent = PaymentIntent.objects.create(
             payment_intent_id=checkout_session.payment_intent,
             checkout_id=checkout_session.id,
-            user=request.user,
+            user=User.objects.get(id=1)
+            # user=request.user,
         )
+
+        # intent.courses.add(*cart_course)
 
         for course in cart_course:
             intent.courses.add(*cart_course)
 
-            # intent.courses.add(course)
+        intent.courses.add(course)
 
         return Response({"url": checkout_session.url})
 
@@ -88,6 +93,7 @@ class Webhook(APIView):
             event = stripe.Webhook.construct_event(
                 payload, sig_header, endpoint_secret
             )
+
         except ValueError as e:
             # Invalid payload
             return Response(status=400)
@@ -113,6 +119,8 @@ class Webhook(APIView):
                 payment_intent=intent,
                 total_amount=Decimal(session.amount_total)/100,
             )
+
+            # intent.user.paid_course.add(*intent.course.all())
 
             for course in intent.courses.all():
                 # TODO add course to user profile
