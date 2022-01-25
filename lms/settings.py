@@ -173,10 +173,10 @@ SIMPLE_JWT = {
 # ]
 
 
-# # PAYMENT
+# PAYMENT
 # STRIPE_SECRET_KEY=os.environ.get('STRIPE_SECRET_KEY')
 # STRIPE_PUBLIC_KEY=os.environ.get('STRIPE_PUBLIC_KEY')
-# WEBHOOK_SECRET=os.environ.get('WEBHOOK_SECRET')
+# WEBHOOK_SECRET = os.environ.get('WEBHOOK_SECRET')
 
 
 # APPEND_SLASH=False
